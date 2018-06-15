@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject1", "UnitTestProject1\UnitTestProject1.csproj", "{A3D7B4CF-EA7D-4D66-9A6D-86A1577FB37D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jack.JSUnitTest", "Jack.JSUnitTest\Jack.JSUnitTest.csproj", "{EFB573D0-3DE4-44B8-BC00-8A3CDF39502D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3D7B4CF-EA7D-4D66-9A6D-86A1577FB37D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3D7B4CF-EA7D-4D66-9A6D-86A1577FB37D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3D7B4CF-EA7D-4D66-9A6D-86A1577FB37D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3D7B4CF-EA7D-4D66-9A6D-86A1577FB37D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFB573D0-3DE4-44B8-BC00-8A3CDF39502D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFB573D0-3DE4-44B8-BC00-8A3CDF39502D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFB573D0-3DE4-44B8-BC00-8A3CDF39502D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFB573D0-3DE4-44B8-BC00-8A3CDF39502D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5472B6AF-9FF2-4DEB-B90D-353F27DA9CA9}
+	EndGlobalSection
+EndGlobal
