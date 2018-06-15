@@ -67,7 +67,7 @@ namespace Jack.JSUnitTest
             putJsFileContentToList(jsPath);
            
         }
-        
+
         void putJsFileContentToList(string jsPath)
         {
             if (JsFiles.Contains(jsPath) )
@@ -130,7 +130,8 @@ namespace Jack.JSUnitTest
                 if (File.Exists(path) == false)
                     throw new Exception($"文件{path}不存在");
                 sw.WriteLine("<script src=\"file:///" + path + "\" type=\"text/javascript\"></script>");
-            }            
+            }
+           
             sw.WriteLine("<body>");
 
             foreach (var simulator in simulators)

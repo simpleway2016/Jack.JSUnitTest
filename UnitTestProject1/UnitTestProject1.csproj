@@ -83,6 +83,7 @@
     <Content Include="Firefox\sandboxbroker.dll" />
     <Content Include="Firefox\softokn3.dll" />
     <Content Include="Firefox\xul.dll" />
+    <EmbeddedResource Include="JavaScript1.js" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jack.JSUnitTest\Jack.JSUnitTest.csproj">
