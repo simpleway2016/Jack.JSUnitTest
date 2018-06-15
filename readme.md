@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Jack.JSUnitTest;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace UnitTestProject1
-{
-    [TestClass]
-    public class UnitTest1
-    {
-        static UnitTest1()
-        {
-
-        }
+```code
+单元测试例子：
 
         [TestMethod]
         public void TestMethod1()
@@ -29,5 +17,4 @@ return data.value + 2;
                     throw new Exception("结果错误");
             }
         }
-    }
-}
+```
