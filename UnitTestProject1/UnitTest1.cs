@@ -10,22 +10,22 @@ namespace UnitTestProject1
     {
         static UnitTest1()
         {
-
+            JsRunner.StartVirtualWebServer( AppDomain.CurrentDomain.BaseDirectory + "\\..\\..\\..\\");
         }
 
         [TestMethod]
         public void TestMethod1()
         {
             var jsCode = @"
-return data.value + 2;
+return data.value + 2 + myData;
 ";
             using (var runner = new JsRunner())
             {
                 //添加依赖的js文件
-                runner.AddJsFile(AppDomain.CurrentDomain.BaseDirectory + @"\..\..\JavaScript1.js");
+                runner.AddJsFile("/UnitTestProject1/JavaScript1.js");
 
                 var value = runner.Run<int>(jsCode, new { value = 3 });
-                if (value != 5)
+                if (value != 15)
                     throw new Exception("结果错误");
             }
         }

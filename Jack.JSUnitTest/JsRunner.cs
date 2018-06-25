@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,14 +11,45 @@ namespace Jack.JSUnitTest
 {
     public class JsRunner:IDisposable
     {
-        static JsRunner()
+        static string ServerUrl;
+        static string WebRoot;
+        /// <summary>
+        /// 启动
+        /// </summary>
+        /// <param name="webFolder">web服务器指向的文件夹，一般为测试工程所在解决方案的文件夹路径</param>
+        /// <returns>返回服务器url</returns>
+        public static string StartVirtualWebServer(string webFolder)
         {
+            if (ServerUrl != null)
+                throw new Exception("不要重复启动服务器");
+
+            WebRoot = webFolder;
             Xpcom.Initialize("Firefox");
+            int port = 0;
+            for (int i = 901; i < 1200; i++)
+            {
+                try
+                {
+                    Socket socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect("127.0.0.1", i);
+                    socket.Dispose();
+                }
+                catch
+                {
+                    port = i;
+                    break;
+                }
+            }
+            Way.Lib.ScriptRemoting.ScriptRemotingServer.RegisterHandler(new VisitHandler());
+            Way.Lib.ScriptRemoting.ScriptRemotingServer.Start(port, webFolder, 0);
+            ServerUrl = $"http://localhost:{port}/";
+            return ServerUrl;
         }
 
         static List<JsFileReference> ReferenceConfigs = new List<JsFileReference>();
         static List<string> GlobalJSFiles = new List<string>();
         static List<Type> SimulatorTypes = new List<Type>();
+        bool _runJsOnWindowLoad = false;
         /// <summary>
         /// 设置js文件依赖
         /// </summary>
@@ -49,8 +81,17 @@ namespace Jack.JSUnitTest
                 throw new Exception("simulatorType必须实现ISimulator接口");
             SimulatorTypes.Add(simulatorType);
         }
-        public JsRunner()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="runJsOnWindowLoad">是否在window.onload后，再运行js代码</param>
+        public JsRunner(bool runJsOnWindowLoad = false)
         {
+            if(ServerUrl == null)
+            {
+                throw new Exception("请先使用静态函数JsRunner.StartVirtualWebServer开启一个服务器");
+            }
+            _runJsOnWindowLoad = runJsOnWindowLoad;
             JsFiles.AddRange(GlobalJSFiles);
         }
         ~JsRunner()
@@ -113,49 +154,66 @@ namespace Jack.JSUnitTest
 
             gecko.NavigationError += (s, e) =>
             {
+               
             };
             gecko.NSSError += (s, e) =>
             {
+
             };
             gecko.DocumentCompleted += (s, e) => {
                 loadFinished = true;
             };
-            string tempFileName = System.IO.Path.GetTempFileName();
-            System.IO.StreamWriter sw = new StreamWriter(System.IO.File.OpenWrite(tempFileName));
-            
-            sw.WriteLine("<!DOCTYPE html>");
-            sw.WriteLine("<html>");
-            foreach (var path in JsFiles)
+            using (System.IO.MemoryStream ms = new MemoryStream())
             {
-                if (File.Exists(path) == false)
-                    throw new Exception($"文件{path}不存在");
-                sw.WriteLine("<script src=\"file:///" + path + "\" type=\"text/javascript\"></script>");
-            }
-           
-            sw.WriteLine("<body>");
+                System.IO.StreamWriter sw = new StreamWriter(ms, Encoding.UTF8);
 
-            foreach (var simulator in simulators)
-            {
-                simulator.OnWritingScript(sw);
-            }
+                sw.WriteLine("<!DOCTYPE html>");
+                sw.WriteLine("<html>");
 
-            sw.WriteLine("</body>");
-            sw.WriteLine("</html>");
-            sw.Dispose();
 
-            gecko.Navigate("file:///" + tempFileName);
+                sw.WriteLine("<body>");
 
-            while (!loadFinished)
-            {
-                System.Threading.Thread.Sleep(10);
-                System.Windows.Forms.Application.DoEvents();
-            }
-            System.IO.File.Delete(tempFileName);
+                foreach (var simulator in simulators)
+                {
+                    simulator.OnWritingScript(sw);
+                }
+                foreach (var path in JsFiles)
+                {
+                    if (path[1] == ':')
+                    {
+                        if (File.Exists(path) == false)
+                            throw new Exception($"文件{path}不存在");
+                        sw.WriteLine("<script src=\"file:///" + path + "\" type=\"text/javascript\"></script>");
+                    }
+                    else
+                    {
+                        sw.WriteLine("<script src=\"" + path + "\" type=\"text/javascript\"></script>");
+                    }
+                }
 
-            var jsContext = new AutoJSContext(gecko.Window);
-           
+                string result;
 
-            var js = @"
+                if (_runJsOnWindowLoad)
+                {
+                    sw.WriteLine("</body>");
+                    sw.WriteLine("</html>");
+                    sw.Dispose();
+
+                    var pageid = Guid.NewGuid().ToString("N");
+                    VisitHandler.HtmlContents.TryAdd(pageid, ms.ToArray());
+                    ms.Dispose();
+                    gecko.Navigate($"{ServerUrl}Jack.JSUnitTest?id={pageid}");
+
+                    while (!loadFinished)
+                    {
+                        System.Threading.Thread.Sleep(10);
+                        System.Windows.Forms.Application.DoEvents();
+                    }
+
+                    var jsContext = new AutoJSContext(gecko.Window);
+
+
+                    var js = @"
 (function(d){
      var result = (function(data){
 
@@ -181,21 +239,73 @@ catch(e)
 })(" + (data == null ? "null" : Newtonsoft.Json.JsonConvert.SerializeObject(data)) + @");
 ";
 
-            string result;
-            jsContext.EvaluateScript(js, out result);
-            jsContext.Dispose();
-            gecko.Dispose();
 
-            if(result.StartsWith("{\"______err\":"))
-            {
-               var errObj =  Newtonsoft.Json.JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(result);
-                string errMsg = errObj.Value<string>("______err");
-                //int lineNumber = errObj.Value<int>("line") - 3;
-                throw new Exception(errMsg);
+                    jsContext.EvaluateScript(js, out result);
+                    jsContext.Dispose();
+                }
+                else
+                {
+                    var guidName = "v" + Guid.NewGuid().ToString("N");
+                    var js = @"
+<script lang='ja'>
+var " + guidName + @" = (function(data){
+
+try{
+        " + jsCode + @"
+    }
+catch(e)
+    {
+        if(typeof e === 'string')
+            return { ______err : e , line:0 };
+        else
+        {
+            var msg = e.message;
+            if(e.name)
+                msg = e.name + ',' + msg;
+            return { ______err :msg , line:e.lineNumber };
+         }
+    }
+})(" + Newtonsoft.Json.JsonConvert.SerializeObject(data) + @");
+" + guidName + @"=JSON.stringify(" + guidName + @");
+</script>
+";
+
+                    sw.WriteLine(js);
+                    sw.WriteLine("</body>");
+                    sw.WriteLine("</html>");
+                    sw.Dispose();
+
+                    var pageid = Guid.NewGuid().ToString("N");
+                    VisitHandler.HtmlContents.TryAdd(pageid, ms.ToArray());
+                    ms.Dispose();
+                    gecko.Navigate($"{ServerUrl}Jack.JSUnitTest?id={pageid}");
+
+                    while (!loadFinished)
+                    {
+                        System.Threading.Thread.Sleep(10);
+                        System.Windows.Forms.Application.DoEvents();
+                    }
+
+                    var jsContext = new AutoJSContext(gecko.Window);
+                    js = guidName;
+                    jsContext.EvaluateScript(js, out result);
+                    jsContext.Dispose();
+                }
+                gecko.Dispose();
+
+                if (result.StartsWith("{\"______err\":"))
+                {
+                    var errObj = Newtonsoft.Json.JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(result);
+                    string errMsg = errObj.Value<string>("______err");
+                    //int lineNumber = errObj.Value<int>("line") - 3;
+                    throw new Exception(errMsg);
+                }
+                if (result.StartsWith("\"") == false && typeof(T) == typeof(string))
+                    return (T)(object)result;
+                if (result == "undefined")
+                    return default(T);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(result);
             }
-            if (typeof(T) == typeof(string))
-                return (T)(object)result;
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(result);
         }
 
         /// <summary>
