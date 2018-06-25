@@ -4,6 +4,8 @@
     <TargetFramework>net46</TargetFramework>
    
     <Description>在.net单元测试里面，支持JavaScript单元测试</Description>
+   
+    <Version>1.0.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

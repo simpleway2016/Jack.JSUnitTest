@@ -157,16 +157,27 @@ namespace Jack.JSUnitTest
 
             var js = @"
 (function(d){
-    try{
-        var result = (function(data){" + jsCode + @"})(d);
-        return JSON.stringify(result);
-    }catch(e)
-    {
-        if(typeof e == 'string')
-            return JSON.stringify({ ______err : e , line:0 });
-        else
-            return JSON.stringify({ ______err : e.message , line:e.lineNumber });
+     var result = (function(data){
+
+try{
+        " + jsCode + @"
     }
+catch(e)
+    {
+        if(typeof e === 'string')
+            return { ______err : e , line:0 };
+        else
+        {
+            var msg = e.message;
+            if(e.name)
+                msg = e.name + ',' + msg;
+            return { ______err :msg , line:e.lineNumber };
+         }
+    }
+})(d);
+     return JSON.stringify(result);
+
+    
 })(" + (data == null ? "null" : Newtonsoft.Json.JsonConvert.SerializeObject(data)) + @");
 ";
 
@@ -182,6 +193,8 @@ namespace Jack.JSUnitTest
                 //int lineNumber = errObj.Value<int>("line") - 3;
                 throw new Exception(errMsg);
             }
+            if (typeof(T) == typeof(string))
+                return (T)(object)result;
             return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(result);
         }
 
