@@ -50,6 +50,12 @@ namespace Jack.JSUnitTest
         static List<string> GlobalJSFiles = new List<string>();
         static List<Type> SimulatorTypes = new List<Type>();
         bool _runJsOnWindowLoad = false;
+
+        /// <summary>
+        /// 需要放置在页面上的html代码
+        /// </summary>
+        public string Html { get; set; }
+
         /// <summary>
         /// 设置js文件依赖
         /// </summary>
@@ -189,6 +195,12 @@ namespace Jack.JSUnitTest
                     {
                         sw.WriteLine("<script src=\"" + path + "\" type=\"text/javascript\"></script>");
                     }
+                }
+
+                if(!string.IsNullOrEmpty(this.Html ))
+
+                {
+                    sw.WriteLine(this.Html);
                 }
 
                 string result;

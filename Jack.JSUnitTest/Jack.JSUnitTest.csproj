@@ -5,7 +5,7 @@
    
     <Description>在.net单元测试里面，支持JavaScript单元测试</Description>
    
-    <Version>1.0.0.6</Version>
+    <Version>1.0.0.7</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
