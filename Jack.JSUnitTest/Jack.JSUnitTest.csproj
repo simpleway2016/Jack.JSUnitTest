@@ -5,11 +5,16 @@
    
     <Description>在.net单元测试里面，支持JavaScript单元测试</Description>
    
-    <Version>1.0.0.7</Version>
+    <Version>1.0.0.8</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+     <DocumentationFile>bin\Release\net46\Jack.JSUnitTest.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\net46\Jack.JSUnitTest.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

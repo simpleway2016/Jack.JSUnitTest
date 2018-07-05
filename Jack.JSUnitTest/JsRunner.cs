@@ -14,7 +14,7 @@ namespace Jack.JSUnitTest
         static string ServerUrl;
         static string WebRoot;
         /// <summary>
-        /// 启动
+        /// 启动web服务器
         /// </summary>
         /// <param name="webFolder">web服务器指向的文件夹，一般为测试工程所在解决方案的文件夹路径</param>
         /// <returns>返回服务器url</returns>
@@ -44,6 +44,14 @@ namespace Jack.JSUnitTest
             Way.Lib.ScriptRemoting.ScriptRemotingServer.Start(port, webFolder, 0);
             ServerUrl = $"http://localhost:{port}/";
             return ServerUrl;
+        }
+
+        /// <summary>
+        /// 停止web服务器
+        /// </summary>
+        public static void StopVirtualWebServer()
+        {
+            Way.Lib.ScriptRemoting.ScriptRemotingServer.Stop();
         }
 
         static List<JsFileReference> ReferenceConfigs = new List<JsFileReference>();
