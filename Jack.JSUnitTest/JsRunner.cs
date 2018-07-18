@@ -49,6 +49,14 @@ namespace Jack.JSUnitTest
             return ServerUrl;
         }
 
+        public static void RegisterRouter(IUrlRouter router)
+        {
+            httpServer.RegisterRouter(router);
+        }
+        public static void RegisterHandler(ICustomHttpHandler handler)
+        {
+            httpServer.RegisterHandler(handler);
+        }
         /// <summary>
         /// 停止web服务器
         /// </summary>
