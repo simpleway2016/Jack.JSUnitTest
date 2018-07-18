@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Way.Lib.ScriptRemoting;
 
 namespace Jack.JSUnitTest
 {
@@ -13,6 +14,7 @@ namespace Jack.JSUnitTest
     {
         static string ServerUrl;
         static string WebRoot;
+        static HttpServer httpServer;
         /// <summary>
         /// 启动web服务器
         /// </summary>
@@ -40,8 +42,9 @@ namespace Jack.JSUnitTest
                     break;
                 }
             }
-            Way.Lib.ScriptRemoting.ScriptRemotingServer.RegisterHandler(new VisitHandler());
-            Way.Lib.ScriptRemoting.ScriptRemotingServer.Start(port, webFolder, 0);
+            httpServer = new HttpServer(new int[] { port }, webFolder);
+            httpServer.RegisterHandler(new VisitHandler());
+            httpServer.Start();
             ServerUrl = $"http://localhost:{port}/";
             return ServerUrl;
         }
@@ -51,7 +54,7 @@ namespace Jack.JSUnitTest
         /// </summary>
         public static void StopVirtualWebServer()
         {
-            Way.Lib.ScriptRemoting.ScriptRemotingServer.Stop();
+            httpServer?.Stop();
         }
 
         static List<JsFileReference> ReferenceConfigs = new List<JsFileReference>();
@@ -152,6 +155,9 @@ namespace Jack.JSUnitTest
         /// <returns></returns>
         public T Run<T>(string jsCode, object data)
         {
+            if (httpServer == null)
+                throw new Exception("请先调用JsRunner.StartVirtualWebServer启动web服务器");
+
             var gecko = new GeckoWebBrowser();
             gecko.CreateControl();
 

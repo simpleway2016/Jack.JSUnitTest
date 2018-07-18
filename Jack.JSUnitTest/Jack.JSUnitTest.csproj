@@ -5,7 +5,9 @@
    
     <Description>在.net单元测试里面，支持JavaScript单元测试</Description>
    
-    <Version>1.0.0.8</Version>
+    <Version>1.0.1.0</Version>
+   
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -20,7 +22,7 @@
   <ItemGroup>
     <PackageReference Include="Geckofx45" Version="45.0.34" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Way.Lib.ScriptRemoting" Version="1.0.0.8" />
+    <PackageReference Include="Way.Lib.ScriptRemoting" Version="1.0.2.1" />
   </ItemGroup>
 
 </Project>
